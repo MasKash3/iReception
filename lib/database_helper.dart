@@ -42,10 +42,6 @@ class DatabaseHelper {
         $colTemplates BLOB
       )
     ''');
-    }).then((_) {
-      print("Table created successfully.");
-    }).catchError((error) {
-      print("Error Occurred: $error");
     });
   }
 

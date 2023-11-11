@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'database_helper.dart';
 import 'person.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class RegisteredUsersPage extends StatefulWidget {
   List<Person> registeredUsers;
@@ -28,23 +29,38 @@ class _RegisteredUsersPageState extends State<RegisteredUsersPage> {
   }
 
   void _saveRegisteredUsers(List<Person> users) {
-    users.forEach((user) async {
-      await _databaseHelper.insertPerson(user);
-    });
+    try {
+      users.forEach((user) async {
+        await _databaseHelper.insertPerson(user);
+      });
+    } catch (e) {
+      // print(e);
+    }
   }
 
   void deletePerson(int index) async {
-    if (index >= 0 && index < widget.registeredUsers.length) {
-      // Delete from the persistent storage
-      await _databaseHelper.deletePerson(widget.registeredUsers[index].name);
+    try {
+      if (index >= 0 && index < widget.registeredUsers.length) {
+        // Delete from the persistent storage
+        await _databaseHelper.deletePerson(widget.registeredUsers[index].name);
 
-      // Update the UI
-      setState(() {
-        widget.registeredUsers.removeAt(index);
-      });
-
-      // Save the updated list to persistent storage
-      _saveRegisteredUsers(widget.registeredUsers);
+        // Update the UI
+        setState(() {
+          widget.registeredUsers.removeAt(index);
+        });
+        Fluttertoast.showToast(
+            msg: "Person removed!",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 16.0);
+        // Save the updated list to persistent storage
+        _saveRegisteredUsers(widget.registeredUsers);
+      }
+    } catch (e) {
+      // print(e);
     }
   }
 
