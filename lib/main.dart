@@ -209,21 +209,26 @@ class MyHomePageState extends State<MyHomePage> {
         for (var face in faces) {
           String? name = await showDialog<String>(
             context: context,
-            builder: (BuildContext context) {
+            builder: (BuildContext dialogContext) {
+              TextEditingController _textController = TextEditingController();
               return AlertDialog(
                 title: const Text('Enter Name'),
                 content: TextField(
-                  controller: TextEditingController(),
+                  controller: _textController,
                   decoration: const InputDecoration(hintText: 'Name'),
                 ),
                 actions: <Widget>[
                   TextButton(
-                    onPressed: () => Navigator.pop(context, 'Cancel'),
+                    onPressed: () => Navigator.pop(dialogContext, null),
                     child: const Text('Cancel'),
                   ),
                   TextButton(
                     onPressed: () {
-                      Navigator.pop(context, 'Save');
+                      if (_textController.text.isNotEmpty) {
+                        Navigator.pop(dialogContext, _textController.text);
+                      } else {
+                        // Show an error message or prevent closing the dialog
+                      }
                     },
                     child: const Text('Save'),
                   ),
@@ -231,29 +236,29 @@ class MyHomePageState extends State<MyHomePage> {
               );
             },
           );
-          if (name == 'Save') {
-            // num randomNumber = 10000 + Random().nextInt(10000);
-            if (name != null) {
-              Person person = Person(
-                name: name, // Use the entered name
-                faceJpg: face['faceJpg'],
-                templates: face['templates'],
-              );
+          // if (name == 'Save') {
+          // num randomNumber = 10000 + Random().nextInt(10000);
+          if (name != null) {
+            Person person = Person(
+              name: name, // Use the entered name
+              faceJpg: face['faceJpg'],
+              templates: face['templates'],
+            );
 
-              // Insert this person into your database
-              await insertPerson(person);
-            }
+            // Insert this person into your database
+            await insertPerson(person);
           }
+          // }
         }
+        Fluttertoast.showToast(
+            msg: "Person enrolled!",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 16.0);
       }
-      Fluttertoast.showToast(
-          msg: "Person enrolled!",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 16.0);
     } catch (e) {}
   }
 
