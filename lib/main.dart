@@ -184,7 +184,6 @@ class MyHomePageState extends State<MyHomePage> {
     );
 
     person = Person(
-      id: id,
       name: person.name,
       faceJpg: person.faceJpg,
       templates: person.templates,
@@ -242,52 +241,69 @@ class MyHomePageState extends State<MyHomePage> {
       final image = await ImagePicker().pickImage(source: ImageSource.gallery);
       if (image == null) return;
 
+      TextEditingController nameController = TextEditingController();
+
+      showDialog(
+        context: context,
+        builder: (BuildContext dialogContext) => AlertDialog(
+          title: const Text("Enter Person's Name"),
+          content: TextField(
+            controller: nameController,
+            decoration: const InputDecoration(hintText: "Name"),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text("OK"),
+              onPressed: () {
+                // Extract the entered name and proceed with image processing
+                String enteredName = nameController.text;
+                if (enteredName.isNotEmpty) {
+                  processImageAndName(enteredName, image);
+                } else {
+                  // Show a toast or message to indicate the name is required
+                  Fluttertoast.showToast(
+                    msg: "Please enter a name!",
+                    // Additional parameters for toast styling
+                  );
+                }
+                Navigator.of(dialogContext).pop();
+              },
+            ),
+          ],
+        ),
+      );
+    } catch (e) {}
+  }
+
+  void processImageAndName(String name, XFile image) async {
+    try {
       var rotatedImage =
           await FlutterExifRotation.rotateImage(path: image.path);
 
       final faces = await _facesdkPlugin.extractFaces(rotatedImage.path);
       for (var face in faces) {
-        // num randomNumber =
-        //     10000 + Random().nextInt(10000); // from 0 upto 99 included
         Person person = Person(
-            id: 0,
-            name: 'Person${Random().nextInt(10000)}',
-            faceJpg: face['faceJpg'],
-            templates: face['templates']);
-        int generatedId = await insertPerson(person);
-
-        int index = widget.personList.length -
-            1; // Get the index of the last added person
-        setState(() {
-          widget.personList[index] = Person(
-            id: generatedId,
-            name: person.name,
-            faceJpg: person.faceJpg,
-            templates: person.templates,
-          );
-        });
+          name: name,
+          faceJpg: face['faceJpg'],
+          templates: face['templates'],
+        );
+        insertPerson(person);
       }
 
       if (faces.length == 0) {
         Fluttertoast.showToast(
-            msg: "No face detected!",
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.BOTTOM,
-            timeInSecForIosWeb: 1,
-            backgroundColor: Colors.red,
-            textColor: Colors.white,
-            fontSize: 16.0);
+          msg: "No face detected!",
+          // Additional parameters for toast styling
+        );
       } else {
         Fluttertoast.showToast(
-            msg: "Person enrolled!",
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.BOTTOM,
-            timeInSecForIosWeb: 1,
-            backgroundColor: Colors.red,
-            textColor: Colors.white,
-            fontSize: 16.0);
+          msg: "Person enrolled!",
+          // Additional parameters for toast styling
+        );
       }
-    } catch (e) {}
+    } catch (e) {
+      // Handle errors, if any
+    }
   }
 
   @override

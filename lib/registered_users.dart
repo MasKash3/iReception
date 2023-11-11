@@ -1,51 +1,22 @@
 import 'package:flutter/material.dart';
-import 'database_helper.dart';
 import 'person.dart';
 
 class RegisteredUsersPage extends StatefulWidget {
-  List<Person> registeredUsers;
+  final List<Person> registeredUsers;
 
-  RegisteredUsersPage({super.key, required this.registeredUsers});
+  const RegisteredUsersPage({super.key, required this.registeredUsers});
 
   @override
   _RegisteredUsersPageState createState() => _RegisteredUsersPageState();
 }
 
 class _RegisteredUsersPageState extends State<RegisteredUsersPage> {
-  final DatabaseHelper _databaseHelper = DatabaseHelper();
-
-  @override
-  void initState() {
-    super.initState();
-    _updateRegisteredUsers();
-  }
-
-  void _updateRegisteredUsers() async {
-    List<Person> users = await _databaseHelper.getPersonsList();
+  void deletePerson(int index) {
     setState(() {
-      widget.registeredUsers = users;
-    });
-  }
-
-  void _saveRegisteredUsers(List<Person> users) {
-    users.forEach((user) async {
-      await _databaseHelper.insertPerson(user);
-    });
-  }
-
-  void deletePerson(int index) async {
-    if (index >= 0 && index < widget.registeredUsers.length) {
-      // Delete from the persistent storage
-      await _databaseHelper.deletePerson(widget.registeredUsers[index].id);
-
-      // Update the UI
-      setState(() {
+      if (index >= 0 && index < widget.registeredUsers.length) {
         widget.registeredUsers.removeAt(index);
-      });
-
-      // Save the updated list to persistent storage
-      _saveRegisteredUsers(widget.registeredUsers);
-    }
+      }
+    });
   }
 
   @override
