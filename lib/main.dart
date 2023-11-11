@@ -207,18 +207,6 @@ class MyHomePageState extends State<MyHomePage> {
             templates: face['templates']);
 
         insertPerson(person);
-        // int generatedId = await insertPerson(person);
-
-        int index = widget.personList.length -
-            1; // Get the index of the last added person
-        setState(() {
-          widget.personList[index] = Person(
-            // id: generatedId,
-            name: person.name,
-            faceJpg: person.faceJpg,
-            templates: person.templates,
-          );
-        });
       }
 
       if (faces.length == 0) {
