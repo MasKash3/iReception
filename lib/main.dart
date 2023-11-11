@@ -183,24 +183,16 @@ class MyHomePageState extends State<MyHomePage> {
         },
       );
 
-      if (action == 'camera') {
-        final image = await ImagePicker().pickImage(source: ImageSource.camera);
+      if (action == 'camera' || action == 'gallery') {
+        final image = action == 'camera'
+            ? await ImagePicker().pickImage(source: ImageSource.camera)
+            : await ImagePicker().pickImage(source: ImageSource.gallery);
+
         if (image == null) return;
 
         var rotatedImage =
             await FlutterExifRotation.rotateImage(path: image.path);
         final faces = await _facesdkPlugin.extractFaces(rotatedImage.path);
-        for (var face in faces) {
-          num randomNumber =
-              10000 + Random().nextInt(10000); // from 0 upto 99 included
-          Person person = Person(
-              // id: 0,
-              name: 'Person$randomNumber',
-              faceJpg: face['faceJpg'],
-              templates: face['templates']);
-
-          insertPerson(person);
-        }
 
         if (faces.length == 0) {
           Fluttertoast.showToast(
@@ -211,58 +203,57 @@ class MyHomePageState extends State<MyHomePage> {
               backgroundColor: Colors.red,
               textColor: Colors.white,
               fontSize: 16.0);
-        } else {
-          Fluttertoast.showToast(
-              msg: "Person enrolled!",
-              toastLength: Toast.LENGTH_SHORT,
-              gravity: ToastGravity.BOTTOM,
-              timeInSecForIosWeb: 1,
-              backgroundColor: Colors.red,
-              textColor: Colors.white,
-              fontSize: 16.0);
+          return;
         }
-        // rest of your logic for face enrollment from the captured image...
-      } else if (action == 'gallery') {
-        final image =
-            await ImagePicker().pickImage(source: ImageSource.gallery);
-        if (image == null) return;
 
-        var rotatedImage =
-            await FlutterExifRotation.rotateImage(path: image.path);
-        final faces = await _facesdkPlugin.extractFaces(rotatedImage.path);
         for (var face in faces) {
-          num randomNumber =
-              10000 + Random().nextInt(10000); // from 0 upto 99 included
-          Person person = Person(
-              // id: 0,
-              name: 'Person$randomNumber',
-              faceJpg: face['faceJpg'],
-              templates: face['templates']);
+          String? name = await showDialog<String>(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text('Enter Name'),
+                content: TextField(
+                  controller: TextEditingController(),
+                  decoration: const InputDecoration(hintText: 'Name'),
+                ),
+                actions: <Widget>[
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, 'Cancel'),
+                    child: const Text('Cancel'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context, 'Save');
+                    },
+                    child: const Text('Save'),
+                  ),
+                ],
+              );
+            },
+          );
+          if (name == 'Save') {
+            // num randomNumber = 10000 + Random().nextInt(10000);
+            if (name != null) {
+              Person person = Person(
+                name: name, // Use the entered name
+                faceJpg: face['faceJpg'],
+                templates: face['templates'],
+              );
 
-          insertPerson(person);
+              // Insert this person into your database
+              await insertPerson(person);
+            }
+          }
         }
-
-        if (faces.length == 0) {
-          Fluttertoast.showToast(
-              msg: "No face detected!",
-              toastLength: Toast.LENGTH_SHORT,
-              gravity: ToastGravity.BOTTOM,
-              timeInSecForIosWeb: 1,
-              backgroundColor: Colors.red,
-              textColor: Colors.white,
-              fontSize: 16.0);
-        } else {
-          Fluttertoast.showToast(
-              msg: "Person enrolled!",
-              toastLength: Toast.LENGTH_SHORT,
-              gravity: ToastGravity.BOTTOM,
-              timeInSecForIosWeb: 1,
-              backgroundColor: Colors.red,
-              textColor: Colors.white,
-              fontSize: 16.0);
-        }
-        // rest of your logic for face enrollment from the gallery image...
       }
+      Fluttertoast.showToast(
+          msg: "Person enrolled!",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0);
     } catch (e) {}
   }
 
