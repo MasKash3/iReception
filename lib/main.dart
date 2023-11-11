@@ -1,5 +1,6 @@
 // ignore_for_file: depend_on_referenced_packages
 
+import 'package:facerecognition_flutter/database_helper.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:math';
@@ -49,6 +50,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class MyHomePageState extends State<MyHomePage> {
+  final DatabaseHelper _databaseHelper = DatabaseHelper();
+
   String _warningState = "";
   bool _visibleWarning = false;
 
@@ -65,6 +68,9 @@ class MyHomePageState extends State<MyHomePage> {
     int facepluginState = -1;
     String warningState = "";
     bool visibleWarning = false;
+
+    List<Person> personList =
+        await _databaseHelper.getPersonsList(); // Use DatabaseHelper method
 
     try {
       if (Platform.isAndroid) {
@@ -94,7 +100,6 @@ class MyHomePageState extends State<MyHomePage> {
       }
     } catch (e) {}
 
-    List<Person> personList = await loadAllPersons();
     await SettingsPageState.initSettings();
 
     final prefs = await SharedPreferences.getInstance();
@@ -134,50 +139,16 @@ class MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  Future<Database> createDB() async {
-    final database = openDatabase(
-      // Set the path to the database. Note: Using the `join` function from the
-      // `path` package is best practice to ensure the path is correctly
-      // constructed for each platform.
-      join(await getDatabasesPath(), 'person.db'),
-      // When the database is first created, create a table to store dogs.
-      onCreate: (db, version) {
-        // Run the CREATE TABLE statement on the database.
-        return db.execute(
-          'CREATE TABLE person(name text, faceJpg blob, templates blob)',
-        );
-      },
-      // Set the version. This executes the onCreate function and provides a
-      // path to perform database upgrades and downgrades.
-      version: 1,
-    );
-
-    return database;
-  }
-
-  // A method that retrieves all the dogs from the dogs table.
-  Future<List<Person>> loadAllPersons() async {
-    // Get a reference to the database.
-    final db = await createDB();
-
-    // Query the table for all The Dogs.
-    final List<Map<String, dynamic>> maps = await db.query('person');
-
-    // Convert the List<Map<String, dynamic> into a List<Dog>.
-    return List.generate(maps.length, (i) {
-      return Person.fromMap(maps[i]);
-    });
-  }
-
   Future<int> insertPerson(Person person) async {
     // Get a reference to the database.
-    final db = await createDB();
+    // final db = await _databaseHelper.getPersonsList();
 
     // Insert the Dog into the correct table. You might also specify the
     // `conflictAlgorithm` to use in case the same dog is inserted twice.
     //
     // In this case, replace any previous data.
-    int id = await db.insert(
+    int id = await _databaseHelper.insertPerson(person);
+    (
       'person',
       person.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
@@ -197,44 +168,23 @@ class MyHomePageState extends State<MyHomePage> {
     return id;
   }
 
-  Future<void> deleteAllPerson() async {
-    final db = await createDB();
-    await db.delete('person');
-
-    setState(() {
-      widget.personList.clear();
-    });
-
-    Fluttertoast.showToast(
-        msg: "All person deleted!",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 1,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 16.0);
-  }
-
   Future<void> deletePerson(index) async {
-    // ignore: invalid_use_of_protected_member
+    try {
+      await _databaseHelper.deletePerson(widget.personList[index].id);
+      // ignore: invalid_use_of_protected_member
+      setState(() {
+        widget.personList.removeAt(index);
+      });
 
-    final db = await createDB();
-    await db.delete('person',
-        where: 'name=?', whereArgs: [widget.personList[index].name]);
-
-    // ignore: invalid_use_of_protected_member
-    setState(() {
-      widget.personList.removeAt(index);
-    });
-
-    Fluttertoast.showToast(
-        msg: "Person removed!",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 1,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 16.0);
+      Fluttertoast.showToast(
+          msg: "Person removed!",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0);
+    } catch (e) {}
   }
 
   Future enrollPerson() async {
@@ -247,13 +197,14 @@ class MyHomePageState extends State<MyHomePage> {
 
       final faces = await _facesdkPlugin.extractFaces(rotatedImage.path);
       for (var face in faces) {
-        // num randomNumber =
-        //     10000 + Random().nextInt(10000); // from 0 upto 99 included
+        num randomNumber =
+            10000 + Random().nextInt(10000); // from 0 upto 99 included
         Person person = Person(
             id: 0,
-            name: 'Person${Random().nextInt(10000)}',
+            name: 'Person$randomNumber',
             faceJpg: face['faceJpg'],
             templates: face['templates']);
+
         int generatedId = await insertPerson(person);
 
         int index = widget.personList.length -
