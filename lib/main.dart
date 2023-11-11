@@ -139,7 +139,7 @@ class MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  Future<int> insertPerson(Person person) async {
+  Future<String> insertPerson(Person person) async {
     // Get a reference to the database.
     // final db = await _databaseHelper.getPersonsList();
 
@@ -147,7 +147,8 @@ class MyHomePageState extends State<MyHomePage> {
     // `conflictAlgorithm` to use in case the same dog is inserted twice.
     //
     // In this case, replace any previous data.
-    int id = await _databaseHelper.insertPerson(person);
+    int name_ = await _databaseHelper.insertPerson(person);
+    String name = String.fromCharCode((name_));
     (
       'person',
       person.toMap(),
@@ -155,7 +156,7 @@ class MyHomePageState extends State<MyHomePage> {
     );
 
     person = Person(
-      id: id,
+      // id: id,
       name: person.name,
       faceJpg: person.faceJpg,
       templates: person.templates,
@@ -165,27 +166,27 @@ class MyHomePageState extends State<MyHomePage> {
       widget.personList.add(person);
     });
 
-    return id;
+    return name;
   }
 
-  Future<void> deletePerson(index) async {
-    try {
-      await _databaseHelper.deletePerson(widget.personList[index].id);
-      // ignore: invalid_use_of_protected_member
-      setState(() {
-        widget.personList.removeAt(index);
-      });
+  // Future<void> deletePerson(index) async {
+  //   try {
+  //     await _databaseHelper.deletePerson(widget.personList[index].name);
+  //     // ignore: invalid_use_of_protected_member
+  //     setState(() {
+  //       widget.personList.removeAt(index);
+  //     });
 
-      Fluttertoast.showToast(
-          msg: "Person removed!",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 16.0);
-    } catch (e) {}
-  }
+  //     Fluttertoast.showToast(
+  //         msg: "Person removed!",
+  //         toastLength: Toast.LENGTH_SHORT,
+  //         gravity: ToastGravity.BOTTOM,
+  //         timeInSecForIosWeb: 1,
+  //         backgroundColor: Colors.red,
+  //         textColor: Colors.white,
+  //         fontSize: 16.0);
+  //   } catch (e) {}
+  // }
 
   Future enrollPerson() async {
     try {
@@ -200,18 +201,19 @@ class MyHomePageState extends State<MyHomePage> {
         num randomNumber =
             10000 + Random().nextInt(10000); // from 0 upto 99 included
         Person person = Person(
-            id: 0,
+            // id: 0,
             name: 'Person$randomNumber',
             faceJpg: face['faceJpg'],
             templates: face['templates']);
 
-        int generatedId = await insertPerson(person);
+        insertPerson(person);
+        // int generatedId = await insertPerson(person);
 
         int index = widget.personList.length -
             1; // Get the index of the last added person
         setState(() {
           widget.personList[index] = Person(
-            id: generatedId,
+            // id: generatedId,
             name: person.name,
             faceJpg: person.faceJpg,
             templates: person.templates,

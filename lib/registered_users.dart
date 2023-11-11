@@ -36,7 +36,7 @@ class _RegisteredUsersPageState extends State<RegisteredUsersPage> {
   void deletePerson(int index) async {
     if (index >= 0 && index < widget.registeredUsers.length) {
       // Delete from the persistent storage
-      await _databaseHelper.deletePerson(widget.registeredUsers[index].id);
+      await _databaseHelper.deletePerson(widget.registeredUsers[index].name);
 
       // Update the UI
       setState(() {

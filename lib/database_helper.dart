@@ -8,7 +8,7 @@ class DatabaseHelper {
   static Database? _database; // Singleton Database
 
   String personTable = 'person';
-  String colId = 'id';
+  // String colId = 'id';
   String colName = 'name';
   String colFaceJpg = 'faceJpg';
   String colTemplates = 'templates';
@@ -36,7 +36,7 @@ class DatabaseHelper {
       // Create the table
       await txn.execute('''
       CREATE TABLE $personTable (
-        $colId INTEGER PRIMARY AUTOINCREMENT,
+        // colId INTEGER PRIMARY AUTOINCREMENT,
         $colName TEXT,
         $colFaceJpg BLOB,
         $colTemplates BLOB
@@ -69,12 +69,12 @@ class DatabaseHelper {
     return persons;
   }
 
-  Future<int> deletePerson(int id) async {
+  Future<int> deletePerson(String name) async {
     Database db = await database;
     int result = await db.delete(
       personTable,
-      where: '$colId = ?',
-      whereArgs: [id],
+      where: '$colName = ?',
+      whereArgs: [name],
     );
     return result;
   }
