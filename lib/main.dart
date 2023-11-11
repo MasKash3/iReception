@@ -139,7 +139,7 @@ class MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  Future<String> insertPerson(Person person) async {
+  Future<int> insertPerson(Person person) async {
     // Get a reference to the database.
     // final db = await _databaseHelper.getPersonsList();
 
@@ -147,8 +147,7 @@ class MyHomePageState extends State<MyHomePage> {
     // `conflictAlgorithm` to use in case the same dog is inserted twice.
     //
     // In this case, replace any previous data.
-    int name_ = await _databaseHelper.insertPerson(person);
-    String name = String.fromCharCode((name_));
+    int id = await _databaseHelper.insertPerson(person);
     (
       'person',
       person.toMap(),
@@ -156,7 +155,7 @@ class MyHomePageState extends State<MyHomePage> {
     );
 
     person = Person(
-      // id: id,
+      id: person.id,
       name: person.name,
       faceJpg: person.faceJpg,
       templates: person.templates,
@@ -166,7 +165,7 @@ class MyHomePageState extends State<MyHomePage> {
       widget.personList.add(person);
     });
 
-    return name;
+    return id;
   }
 
   // Future<void> deletePerson(index) async {
@@ -201,19 +200,19 @@ class MyHomePageState extends State<MyHomePage> {
         num randomNumber =
             10000 + Random().nextInt(10000); // from 0 upto 99 included
         Person person = Person(
-            // id: 0,
+            id: 0,
             name: 'Person$randomNumber',
             faceJpg: face['faceJpg'],
             templates: face['templates']);
 
         insertPerson(person);
-        // int generatedId = await insertPerson(person);
+        int generatedId = await insertPerson(person);
 
         int index = widget.personList.length -
             1; // Get the index of the last added person
         setState(() {
           widget.personList[index] = Person(
-            // id: generatedId,
+            id: generatedId,
             name: person.name,
             faceJpg: person.faceJpg,
             templates: person.templates,

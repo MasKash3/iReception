@@ -8,7 +8,7 @@ class DatabaseHelper {
   static Database? _database; // Singleton Database
 
   String personTable = 'person';
-  // String colId = 'id';
+  String colId = 'id';
   String colName = 'name';
   String colFaceJpg = 'faceJpg';
   String colTemplates = 'templates';
@@ -36,7 +36,7 @@ class DatabaseHelper {
       // Create the table
       await txn.execute('''
       CREATE TABLE $personTable (
-        // colId INTEGER PRIMARY AUTOINCREMENT,
+        $colId INTEGER PRIMARY KEY AUTOINCREMENT,
         $colName TEXT,
         $colFaceJpg BLOB,
         $colTemplates BLOB
