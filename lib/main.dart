@@ -184,6 +184,7 @@ class MyHomePageState extends State<MyHomePage> {
     );
 
     person = Person(
+      id: id,
       name: person.name,
       faceJpg: person.faceJpg,
       templates: person.templates,
@@ -246,13 +247,25 @@ class MyHomePageState extends State<MyHomePage> {
 
       final faces = await _facesdkPlugin.extractFaces(rotatedImage.path);
       for (var face in faces) {
-        num randomNumber =
-            10000 + Random().nextInt(10000); // from 0 upto 99 included
+        // num randomNumber =
+        //     10000 + Random().nextInt(10000); // from 0 upto 99 included
         Person person = Person(
-            name: 'Person$randomNumber',
+            id: 0,
+            name: 'Person${Random().nextInt(10000)}',
             faceJpg: face['faceJpg'],
             templates: face['templates']);
-        insertPerson(person);
+        int generatedId = await insertPerson(person);
+
+        int index = widget.personList.length -
+            1; // Get the index of the last added person
+        setState(() {
+          widget.personList[index] = Person(
+            id: generatedId,
+            name: person.name,
+            faceJpg: person.faceJpg,
+            templates: person.templates,
+          );
+        });
       }
 
       if (faces.length == 0) {
