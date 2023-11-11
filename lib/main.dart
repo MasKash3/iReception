@@ -150,6 +150,11 @@ class MyHomePageState extends State<MyHomePage> {
 
     person = Person(
       name: name,
+      department: person.department,
+      position: person.position,
+      email: person.email,
+      employeeNumber: person.employeeNumber,
+      timeIn: person.timeIn,
       faceJpg: person.faceJpg,
       templates: person.templates,
     );
@@ -161,16 +166,43 @@ class MyHomePageState extends State<MyHomePage> {
     return name;
   }
 
-  Future<String?> getNameDialog(BuildContext context) async {
-    return showDialog<String>(
+  Future<Map<String, String>?> getDetailsDialog(BuildContext context) async {
+    return showDialog<Map<String, String>>(
       context: context,
       builder: (BuildContext dialogContext) {
-        TextEditingController textController = TextEditingController();
+        TextEditingController nameController = TextEditingController();
+        TextEditingController departmentController = TextEditingController();
+        TextEditingController positionController = TextEditingController();
+        TextEditingController emailController = TextEditingController();
+        TextEditingController employeeNumberController =
+            TextEditingController();
+
         return AlertDialog(
-          title: const Text('Enter Name'),
-          content: TextField(
-            controller: textController,
-            decoration: const InputDecoration(hintText: 'Name'),
+          title: const Text('Enter Details'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(hintText: 'Name'),
+              ),
+              TextField(
+                controller: departmentController,
+                decoration: const InputDecoration(hintText: 'Department'),
+              ),
+              TextField(
+                controller: positionController,
+                decoration: const InputDecoration(hintText: 'Position'),
+              ),
+              TextField(
+                controller: emailController,
+                decoration: const InputDecoration(hintText: 'Email'),
+              ),
+              TextField(
+                controller: employeeNumberController,
+                decoration: const InputDecoration(hintText: 'Employee Number'),
+              ),
+            ],
           ),
           actions: <Widget>[
             TextButton(
@@ -179,8 +211,20 @@ class MyHomePageState extends State<MyHomePage> {
             ),
             TextButton(
               onPressed: () {
-                if (textController.text.isNotEmpty) {
-                  Navigator.pop(dialogContext, textController.text);
+                final name = nameController.text;
+                final department = departmentController.text;
+                final position = positionController.text;
+                final email = emailController.text;
+                final employeeNumber = employeeNumberController.text;
+
+                if (name.isNotEmpty) {
+                  Navigator.pop(dialogContext, {
+                    'name': name,
+                    'department': department,
+                    'position': position,
+                    'email': email,
+                    'employeeNumber': employeeNumber,
+                  });
                 } else {
                   // Show an error message or prevent closing the dialog
                 }
@@ -238,7 +282,7 @@ class MyHomePageState extends State<MyHomePage> {
         }
 
         for (var face in faces) {
-          String? name = await getNameDialog(context);
+          final details = await getDetailsDialog(context);
           String capitalize(String name) {
             List<String> words = name.split(' ');
             words = words.map((word) {
@@ -250,23 +294,37 @@ class MyHomePageState extends State<MyHomePage> {
             return words.join(' ');
           }
 
-          if (name != null) {
-            Person person = Person(
-              name: capitalize(name), // Use the entered name
-              faceJpg: face['faceJpg'],
-              templates: face['templates'],
-            );
-            await insertPerson(person);
+          if (details != null && details['name'] != null) {
+            final name = details['name'];
+            final department = details['department'];
+            final position = details['position'];
+            final email = details['email'];
+            final employeeNumber = details['employeeNumber'];
+            // Record the current time
+            final timeIn = DateTime.now().toString();
+            if (name != null) {
+              Person person = Person(
+                name: capitalize(name), // Use the entered name
+                department: department ?? '',
+                position: position ?? '',
+                email: email ?? '',
+                employeeNumber: employeeNumber ?? '',
+                timeIn: timeIn,
+                faceJpg: face['faceJpg'],
+                templates: face['templates'],
+              );
+              await insertPerson(person);
+            }
           }
+          Fluttertoast.showToast(
+              msg: "Person enrolled!",
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.BOTTOM,
+              timeInSecForIosWeb: 1,
+              backgroundColor: Colors.red,
+              textColor: Colors.white,
+              fontSize: 16.0);
         }
-        Fluttertoast.showToast(
-            msg: "Person enrolled!",
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.BOTTOM,
-            timeInSecForIosWeb: 1,
-            backgroundColor: Colors.red,
-            textColor: Colors.white,
-            fontSize: 16.0);
       }
     } catch (e) {}
   }
