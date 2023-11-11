@@ -182,14 +182,14 @@ class FaceRecognitionViewState extends State<FaceRecognitionView> {
                                             BorderRadius.circular(8.0),
                                         child: Image.memory(
                                           _enrolledFace,
-                                          width: 160,
-                                          height: 160,
+                                          width: 250,
+                                          height: 250,
                                         ),
                                       ),
                                       const SizedBox(
                                         height: 5,
                                       ),
-                                      const Text('Enrolled')
+                                      const Text('Registered')
                                     ],
                                   )
                                 : const SizedBox(
@@ -203,8 +203,8 @@ class FaceRecognitionViewState extends State<FaceRecognitionView> {
                                             BorderRadius.circular(8.0),
                                         child: Image.memory(
                                           _identifiedFace,
-                                          width: 160,
-                                          height: 160,
+                                          width: 250,
+                                          height: 250,
                                         ),
                                       ),
                                       const SizedBox(
@@ -227,91 +227,24 @@ class FaceRecognitionViewState extends State<FaceRecognitionView> {
                               width: 16,
                             ),
                             Text(
-                              'Identified: $_identifiedName',
-                              style: const TextStyle(fontSize: 18),
+                              'Name: $_identifiedName',
+                              style: const TextStyle(fontSize: 20),
                             )
                           ],
                         ),
                         const SizedBox(
-                          height: 10,
-                        ),
-                        Row(
-                          children: [
-                            const SizedBox(
-                              width: 16,
-                            ),
-                            Text(
-                              'Similarity: $_identifiedSimilarity',
-                              style: const TextStyle(fontSize: 18),
-                            )
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        Row(
-                          children: [
-                            const SizedBox(
-                              width: 16,
-                            ),
-                            Text(
-                              'Liveness score: $_identifiedLiveness',
-                              style: const TextStyle(fontSize: 18),
-                            )
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        Row(
-                          children: [
-                            const SizedBox(
-                              width: 16,
-                            ),
-                            Text(
-                              'Yaw: $_identifiedYaw',
-                              style: const TextStyle(fontSize: 18),
-                            )
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        Row(
-                          children: [
-                            const SizedBox(
-                              width: 16,
-                            ),
-                            Text(
-                              'Roll: $_identifiedRoll',
-                              style: const TextStyle(fontSize: 18),
-                            )
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        Row(
-                          children: [
-                            const SizedBox(
-                              width: 16,
-                            ),
-                            Text(
-                              'Pitch: $_identifiedPitch',
-                              style: const TextStyle(fontSize: 18),
-                            )
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 16,
+                          height: 50,
                         ),
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 16, horizontal: 24),
                             backgroundColor:
                                 Theme.of(context).colorScheme.primaryContainer,
                           ),
                           onPressed: () => faceRecognitionStart(),
-                          child: const Text('Try again'),
+                          child: const Text('Try again',
+                              style: TextStyle(fontSize: 20)),
                         ),
                       ]),
                 )),
@@ -393,10 +326,10 @@ class FacePainter extends CustomPainter {
         Color color = const Color.fromARGB(0xff, 0xff, 0, 0);
         if (face['liveness'] < livenessThreshold) {
           color = const Color.fromARGB(0xff, 0xff, 0, 0);
-          title = "Spoof" + face['liveness'].toString();
+          title = "Spoof${face['liveness']}";
         } else {
           color = const Color.fromARGB(0xff, 0, 0xff, 0);
-          title = "Real " + face['liveness'].toString();
+          title = "Real ${face['liveness']}";
         }
 
         TextSpan span =
