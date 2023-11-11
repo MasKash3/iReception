@@ -8,7 +8,7 @@ class DatabaseHelper {
   static Database? _database; // Singleton Database
 
   String personTable = 'person';
-  String colId = 'id';
+  // String colId = 'id';
   String colName = 'name';
   String colFaceJpg = 'faceJpg';
   String colTemplates = 'templates';
@@ -33,22 +33,15 @@ class DatabaseHelper {
 
   void _createDb(Database db, int newVersion) async {
     await db.transaction((txn) async {
-      // Drop the table if it exists
-      await txn.execute('DROP TABLE IF EXISTS $personTable');
-
       // Create the table
       await txn.execute('''
       CREATE TABLE $personTable (
-        $colId INTEGER PRIMARY KEY AUTOINCREMENT,
+        // colId INTEGER PRIMARY AUTOINCREMENT,
         $colName TEXT,
         $colFaceJpg BLOB,
         $colTemplates BLOB
       )
     ''');
-    }).then((_) {
-      print("Table created successfully.");
-    }).catchError((error) {
-      print("Error Occurred: $error");
     });
   }
 
@@ -72,12 +65,12 @@ class DatabaseHelper {
     return persons;
   }
 
-  Future<int> deletePerson(int id) async {
+  Future<int> deletePerson(String name) async {
     Database db = await database;
     int result = await db.delete(
       personTable,
-      where: '$colId = ?',
-      whereArgs: [id],
+      where: '$colName = ?',
+      whereArgs: [name],
     );
     return result;
   }

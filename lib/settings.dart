@@ -288,7 +288,7 @@ class SettingsPageState extends State<SettingsPage> {
                 title: const Text('Clear all person'),
                 leading: const Icon(Icons.clear_all),
                 onPressed: (value) {
-                  widget.homePageState.deleteAllPerson();
+                  // widget.homePageState.deleteAllPerson();
                 },
               ),
             ],

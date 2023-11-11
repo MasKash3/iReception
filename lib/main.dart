@@ -1,12 +1,13 @@
 // ignore_for_file: depend_on_referenced_packages
 
+import 'package:facerecognition_flutter/database_helper.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:math';
 import 'package:facesdk_plugin/facesdk_plugin.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_exif_rotation/flutter_exif_rotation.dart';
-import 'package:path/path.dart';
+// import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -49,6 +50,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class MyHomePageState extends State<MyHomePage> {
+  final DatabaseHelper _databaseHelper = DatabaseHelper();
+
   String _warningState = "";
   bool _visibleWarning = false;
 
@@ -65,6 +68,9 @@ class MyHomePageState extends State<MyHomePage> {
     int facepluginState = -1;
     String warningState = "";
     bool visibleWarning = false;
+
+    List<Person> personList =
+        await _databaseHelper.getPersonsList(); // Use DatabaseHelper method
 
     try {
       if (Platform.isAndroid) {
@@ -94,7 +100,6 @@ class MyHomePageState extends State<MyHomePage> {
       }
     } catch (e) {}
 
-    List<Person> personList = await loadAllPersons();
     await SettingsPageState.initSettings();
 
     final prefs = await SharedPreferences.getInstance();
@@ -134,57 +139,17 @@ class MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  Future<Database> createDB() async {
-    final database = openDatabase(
-      // Set the path to the database. Note: Using the `join` function from the
-      // `path` package is best practice to ensure the path is correctly
-      // constructed for each platform.
-      join(await getDatabasesPath(), 'person.db'),
-      // When the database is first created, create a table to store dogs.
-      onCreate: (db, version) {
-        // Run the CREATE TABLE statement on the database.
-        return db.execute(
-          'CREATE TABLE person(name text, faceJpg blob, templates blob)',
-        );
-      },
-      // Set the version. This executes the onCreate function and provides a
-      // path to perform database upgrades and downgrades.
-      version: 1,
-    );
-
-    return database;
-  }
-
-  // A method that retrieves all the dogs from the dogs table.
-  Future<List<Person>> loadAllPersons() async {
-    // Get a reference to the database.
-    final db = await createDB();
-
-    // Query the table for all The Dogs.
-    final List<Map<String, dynamic>> maps = await db.query('person');
-
-    // Convert the List<Map<String, dynamic> into a List<Dog>.
-    return List.generate(maps.length, (i) {
-      return Person.fromMap(maps[i]);
-    });
-  }
-
-  Future<int> insertPerson(Person person) async {
-    // Get a reference to the database.
-    final db = await createDB();
-
-    // Insert the Dog into the correct table. You might also specify the
-    // `conflictAlgorithm` to use in case the same dog is inserted twice.
-    //
-    // In this case, replace any previous data.
-    int id = await db.insert(
+  Future<String> insertPerson(Person person) async {
+    int name_ = await _databaseHelper.insertPerson(person);
+    String name = String.fromCharCode((name_));
+    (
       'person',
       person.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
 
     person = Person(
-      name: person.name,
+      name: name,
       faceJpg: person.faceJpg,
       templates: person.templates,
     );
@@ -193,117 +158,117 @@ class MyHomePageState extends State<MyHomePage> {
       widget.personList.add(person);
     });
 
-    return id;
+    return name;
   }
 
-  Future<void> deleteAllPerson() async {
-    final db = await createDB();
-    await db.delete('person');
-
-    setState(() {
-      widget.personList.clear();
-    });
-
-    Fluttertoast.showToast(
-        msg: "All person deleted!",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 1,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 16.0);
-  }
-
-  Future<void> deletePerson(index) async {
-    // ignore: invalid_use_of_protected_member
-
-    final db = await createDB();
-    await db.delete('person',
-        where: 'name=?', whereArgs: [widget.personList[index].name]);
-
-    // ignore: invalid_use_of_protected_member
-    setState(() {
-      widget.personList.removeAt(index);
-    });
-
-    Fluttertoast.showToast(
-        msg: "Person removed!",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 1,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 16.0);
+  Future<String?> getNameDialog(BuildContext context) async {
+    return showDialog<String>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        TextEditingController textController = TextEditingController();
+        return AlertDialog(
+          title: const Text('Enter Name'),
+          content: TextField(
+            controller: textController,
+            decoration: const InputDecoration(hintText: 'Name'),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, null),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                if (textController.text.isNotEmpty) {
+                  Navigator.pop(dialogContext, textController.text);
+                } else {
+                  // Show an error message or prevent closing the dialog
+                }
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future enrollPerson() async {
     try {
-      final image = await ImagePicker().pickImage(source: ImageSource.gallery);
-      if (image == null) return;
-
-      TextEditingController nameController = TextEditingController();
-
-      showDialog(
+      final action = await showDialog<String>(
         context: context,
-        builder: (BuildContext dialogContext) => AlertDialog(
-          title: const Text("Enter Person's Name"),
-          content: TextField(
-            controller: nameController,
-            decoration: const InputDecoration(hintText: "Name"),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text("OK"),
-              onPressed: () {
-                // Extract the entered name and proceed with image processing
-                String enteredName = nameController.text;
-                if (enteredName.isNotEmpty) {
-                  processImageAndName(enteredName, image);
-                } else {
-                  // Show a toast or message to indicate the name is required
-                  Fluttertoast.showToast(
-                    msg: "Please enter a name!",
-                    // Additional parameters for toast styling
-                  );
-                }
-                Navigator.of(dialogContext).pop();
-              },
-            ),
-          ],
-        ),
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Choose an option'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.pop(context, 'camera'),
+                child: const Text('Camera'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, 'gallery'),
+                child: const Text('Gallery'),
+              ),
+            ],
+          );
+        },
       );
+
+      if (action == 'camera' || action == 'gallery') {
+        final image = action == 'camera'
+            ? await ImagePicker().pickImage(source: ImageSource.camera)
+            : await ImagePicker().pickImage(source: ImageSource.gallery);
+
+        if (image == null) return;
+
+        var rotatedImage =
+            await FlutterExifRotation.rotateImage(path: image.path);
+        final faces = await _facesdkPlugin.extractFaces(rotatedImage.path);
+
+        if (faces.length == 0) {
+          Fluttertoast.showToast(
+              msg: "No face detected!",
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.BOTTOM,
+              timeInSecForIosWeb: 1,
+              backgroundColor: Colors.red,
+              textColor: Colors.white,
+              fontSize: 16.0);
+          return;
+        }
+
+        for (var face in faces) {
+          String? name = await getNameDialog(context);
+          String capitalize(String name) {
+            List<String> words = name.split(' ');
+            words = words.map((word) {
+              if (word.isNotEmpty) {
+                return word[0].toUpperCase() + word.substring(1).toLowerCase();
+              }
+              return word;
+            }).toList();
+            return words.join(' ');
+          }
+
+          if (name != null) {
+            Person person = Person(
+              name: capitalize(name), // Use the entered name
+              faceJpg: face['faceJpg'],
+              templates: face['templates'],
+            );
+            await insertPerson(person);
+          }
+        }
+        Fluttertoast.showToast(
+            msg: "Person enrolled!",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 16.0);
+      }
     } catch (e) {}
-  }
-
-  void processImageAndName(String name, XFile image) async {
-    try {
-      var rotatedImage =
-          await FlutterExifRotation.rotateImage(path: image.path);
-
-      final faces = await _facesdkPlugin.extractFaces(rotatedImage.path);
-      for (var face in faces) {
-        Person person = Person(
-          name: name,
-          faceJpg: face['faceJpg'],
-          templates: face['templates'],
-        );
-        insertPerson(person);
-      }
-
-      if (faces.length == 0) {
-        Fluttertoast.showToast(
-          msg: "No face detected!",
-          // Additional parameters for toast styling
-        );
-      } else {
-        Fluttertoast.showToast(
-          msg: "Person enrolled!",
-          // Additional parameters for toast styling
-        );
-      }
-    } catch (e) {
-      // Handle errors, if any
-    }
   }
 
   @override
