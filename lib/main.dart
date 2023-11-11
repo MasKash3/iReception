@@ -149,8 +149,7 @@ class MyHomePageState extends State<MyHomePage> {
     );
 
     person = Person(
-      // id: id,
-      name: person.name,
+      name: name,
       faceJpg: person.faceJpg,
       templates: person.templates,
     );
@@ -160,6 +159,38 @@ class MyHomePageState extends State<MyHomePage> {
     });
 
     return name;
+  }
+
+  Future<String?> getNameDialog(BuildContext context) async {
+    return showDialog<String>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        TextEditingController textController = TextEditingController();
+        return AlertDialog(
+          title: const Text('Enter Name'),
+          content: TextField(
+            controller: textController,
+            decoration: const InputDecoration(hintText: 'Name'),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, null),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                if (textController.text.isNotEmpty) {
+                  Navigator.pop(dialogContext, textController.text);
+                } else {
+                  // Show an error message or prevent closing the dialog
+                }
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future enrollPerson() async {
@@ -207,48 +238,26 @@ class MyHomePageState extends State<MyHomePage> {
         }
 
         for (var face in faces) {
-          String? name = await showDialog<String>(
-            context: context,
-            builder: (BuildContext dialogContext) {
-              TextEditingController _textController = TextEditingController();
-              return AlertDialog(
-                title: const Text('Enter Name'),
-                content: TextField(
-                  controller: _textController,
-                  decoration: const InputDecoration(hintText: 'Name'),
-                ),
-                actions: <Widget>[
-                  TextButton(
-                    onPressed: () => Navigator.pop(dialogContext, null),
-                    child: const Text('Cancel'),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      if (_textController.text.isNotEmpty) {
-                        Navigator.pop(dialogContext, _textController.text);
-                      } else {
-                        // Show an error message or prevent closing the dialog
-                      }
-                    },
-                    child: const Text('Save'),
-                  ),
-                ],
-              );
-            },
-          );
-          // if (name == 'Save') {
-          // num randomNumber = 10000 + Random().nextInt(10000);
+          String? name = await getNameDialog(context);
+          String capitalize(String name) {
+            List<String> words = name.split(' ');
+            words = words.map((word) {
+              if (word.isNotEmpty) {
+                return word[0].toUpperCase() + word.substring(1).toLowerCase();
+              }
+              return word;
+            }).toList();
+            return words.join(' ');
+          }
+
           if (name != null) {
             Person person = Person(
-              name: name, // Use the entered name
+              name: capitalize(name), // Use the entered name
               faceJpg: face['faceJpg'],
               templates: face['templates'],
             );
-
-            // Insert this person into your database
             await insertPerson(person);
           }
-          // }
         }
         Fluttertoast.showToast(
             msg: "Person enrolled!",
