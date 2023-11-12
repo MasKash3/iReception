@@ -27,12 +27,12 @@ class Person {
   factory Person.fromMap(Map<String, dynamic> data) {
     return Person(
       // id: data['id'], // Retrieve the ID from the map
-      name: data['name'],
-      department: data['department'],
-      position: data['position'],
-      email: data['email'],
-      employeeNumber: data['employeeNumber'],
-      timeIn: data['timeIn'],
+      name: data['name'] ?? '',
+      department: data['department'] ?? '',
+      position: data['position'] ?? '',
+      email: data['email'] ?? '',
+      employeeNumber: data['employeeNumber'] ?? '',
+      timeIn: data['timeIn'] ?? '',
       faceJpg: data['faceJpg'],
       templates: data['templates'],
     );

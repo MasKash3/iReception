@@ -64,71 +64,55 @@ class _RegisteredUsersPageState extends State<RegisteredUsersPage> {
     }
   }
 
-  Future<List<Person>> _getUsers() async {
-    return _databaseHelper.getPersonsList();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Registered Users'),
       ),
-      body: FutureBuilder<List<Person>>(
-        future: _getUsers(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const CircularProgressIndicator();
-          } else if (snapshot.hasError) {
-            return const Text('Error fetching data');
-          } else if (snapshot.hasData) {
-            return ListView.builder(
-                itemCount: snapshot.data!.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return Dismissible(
-                    key: Key(widget.registeredUsers[index].name),
-                    onDismissed: (direction) {
-                      deletePerson(index);
-                    },
-                    background: Container(
-                      color: Colors.red,
-                      alignment: Alignment.centerRight,
-                      padding: const EdgeInsets.only(right: 20.0),
-                      child: const Icon(Icons.delete, color: Colors.red),
-                    ),
-                    child: SizedBox(
-                      height: 75,
-                      child: Card(
-                        child: Row(
-                          children: [
-                            const SizedBox(width: 16),
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(28.0),
-                              child: Image.memory(
-                                widget.registeredUsers[index].faceJpg,
-                                width: 56,
-                                height: 56,
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Text(widget.registeredUsers[index].name),
-                            const Spacer(),
-                            IconButton(
-                              icon: const Icon(Icons.delete),
-                              onPressed: () {
-                                deletePerson(index);
-                              },
-                            ),
-                            const SizedBox(width: 8),
-                          ],
-                        ),
+      body: ListView.builder(
+        itemCount: widget.registeredUsers.length,
+        itemBuilder: (BuildContext context, int index) {
+          return Dismissible(
+            key: Key(widget.registeredUsers[index].name),
+            onDismissed: (direction) {
+              deletePerson(index);
+            },
+            background: Container(
+              color: Colors.red,
+              alignment: Alignment.centerRight,
+              padding: const EdgeInsets.only(right: 20.0),
+              child: const Icon(Icons.delete, color: Colors.red),
+            ),
+            child: SizedBox(
+              height: 75,
+              child: Card(
+                child: Row(
+                  children: [
+                    const SizedBox(width: 16),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(28.0),
+                      child: Image.memory(
+                        widget.registeredUsers[index].faceJpg,
+                        width: 56,
+                        height: 56,
                       ),
                     ),
-                  );
-                });
-          } else {
-            return const Text('No data found');
-          }
+                    const SizedBox(width: 16),
+                    Text(widget.registeredUsers[index].name),
+                    const Spacer(),
+                    IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () {
+                        deletePerson(index);
+                      },
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+                ),
+              ),
+            ),
+          );
         },
       ),
     );

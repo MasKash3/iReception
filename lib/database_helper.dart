@@ -10,6 +10,11 @@ class DatabaseHelper {
   String personTable = 'person';
   // String colId = 'id';
   String colName = 'name';
+  String colDepartment = 'department';
+  String colPosition = 'position';
+  String colEmail = 'email';
+  String colemployeeNumber = 'employeeNumber';
+  String coltimeIn = 'timeIn';
   String colFaceJpg = 'faceJpg';
   String colTemplates = 'templates';
 
@@ -36,8 +41,13 @@ class DatabaseHelper {
       // Create the table
       await txn.execute('''
       CREATE TABLE $personTable (
-        // colId INTEGER PRIMARY AUTOINCREMENT,
+        -- colId INTEGER PRIMARY AUTOINCREMENT,
         $colName TEXT,
+        $colDepartment TEXT,
+        $colPosition TEXT,
+        $colEmail TEXT,
+        $colemployeeNumber TEXT,
+        $coltimeIn TEXT,
         $colFaceJpg BLOB,
         $colTemplates BLOB
       )
@@ -50,6 +60,7 @@ class DatabaseHelper {
   Future<int> insertPerson(Person person) async {
     Database db = await database;
     var result = await db.insert(personTable, person.toMap());
+    print('Insertion result: $result');
     return result;
   }
 

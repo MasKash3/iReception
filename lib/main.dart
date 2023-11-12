@@ -41,8 +41,8 @@ class MyApp extends StatelessWidget {
 // ignore: must_be_immutable
 class MyHomePage extends StatefulWidget {
   final String title;
-  var personList = <Person>[];
-
+  // var personList = <Person>[];
+  List<Person> personList = [];
   MyHomePage({super.key, required this.title});
 
   @override
@@ -139,30 +139,39 @@ class MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  Future<String> insertPerson(Person person) async {
-    int name_ = await _databaseHelper.insertPerson(person);
-    String name = String.fromCharCode((name_));
+  Future<void> insertPerson(Person person) async {
+    int result = await _databaseHelper.insertPerson(person);
+    // await _databaseHelper.insertPerson(person);
     (
       'person',
       person.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+    if (result != -1) {
+      person = Person(
+        name: person.name,
+        department: person.department,
+        position: person.position,
+        email: person.email,
+        employeeNumber: person.employeeNumber,
+        timeIn: person.timeIn,
+        faceJpg: person.faceJpg,
+        templates: person.templates,
+      );
 
-    person = Person(
-      name: name,
-      department: person.department,
-      position: person.position,
-      email: person.email,
-      employeeNumber: person.employeeNumber,
-      timeIn: person.timeIn,
-      faceJpg: person.faceJpg,
-      templates: person.templates,
-    );
-
-    setState(() {
-      widget.personList.add(person);
-    });
-
+      setState(() {
+        widget.personList.add(person);
+      });
+    } else {
+      Fluttertoast.showToast(
+          msg: "Person already exists!",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0);
+    }
     return name;
   }
 
@@ -177,7 +186,8 @@ class MyHomePageState extends State<MyHomePage> {
         TextEditingController employeeNumberController =
             TextEditingController();
 
-        return AlertDialog(
+        return SingleChildScrollView(
+            child: AlertDialog(
           title: const Text('Enter Details'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -232,7 +242,7 @@ class MyHomePageState extends State<MyHomePage> {
               child: const Text('Save'),
             ),
           ],
-        );
+        ));
       },
     );
   }
@@ -282,6 +292,7 @@ class MyHomePageState extends State<MyHomePage> {
         }
 
         for (var face in faces) {
+          // String? name = (await getDetailsDialog(context)) as String?;
           final details = await getDetailsDialog(context);
           String capitalize(String name) {
             List<String> words = name.split(' ');
@@ -294,37 +305,30 @@ class MyHomePageState extends State<MyHomePage> {
             return words.join(' ');
           }
 
-          if (details != null && details['name'] != null) {
-            final name = details['name'];
-            final department = details['department'];
-            final position = details['position'];
-            final email = details['email'];
-            final employeeNumber = details['employeeNumber'];
-            // Record the current time
-            final timeIn = DateTime.now().toString();
-            if (name != null) {
-              Person person = Person(
-                name: capitalize(name), // Use the entered name
-                department: department ?? '',
-                position: position ?? '',
-                email: email ?? '',
-                employeeNumber: employeeNumber ?? '',
-                timeIn: timeIn,
-                faceJpg: face['faceJpg'],
-                templates: face['templates'],
-              );
-              await insertPerson(person);
-            }
+          // print(details?['name']);
+
+          if (details?['name'] != null) {
+            Person person = Person(
+              name: capitalize(details!['name']!), // Use the entered name
+              department: details['department']!,
+              position: details['position']!,
+              email: details['email']!,
+              employeeNumber: details['employeeNumber']!,
+              timeIn: DateTime.now().toString(),
+              faceJpg: face['faceJpg'],
+              templates: face['templates'],
+            );
+            await insertPerson(person);
           }
-          Fluttertoast.showToast(
-              msg: "Person enrolled!",
-              toastLength: Toast.LENGTH_SHORT,
-              gravity: ToastGravity.BOTTOM,
-              timeInSecForIosWeb: 1,
-              backgroundColor: Colors.red,
-              textColor: Colors.white,
-              fontSize: 16.0);
         }
+        Fluttertoast.showToast(
+            msg: "Person enrolled!",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 16.0);
       }
     } catch (e) {}
   }
