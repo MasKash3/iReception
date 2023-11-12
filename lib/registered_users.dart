@@ -38,6 +38,72 @@ class _RegisteredUsersPageState extends State<RegisteredUsersPage> {
     }
   }
 
+  void showUserDetails(int index) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                ),
+                Center(
+                  child: Image.memory(
+                    widget.registeredUsers[index].faceJpg,
+                    width: 200,
+                    height: 200,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Name: ${widget.registeredUsers[index].name}',
+                  style: const TextStyle(fontSize: 18),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Department: ${widget.registeredUsers[index].department}',
+                  style: const TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Position: ${widget.registeredUsers[index].position}',
+                  style: const TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Email: ${widget.registeredUsers[index].email}',
+                  style: const TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Employee Number: ${widget.registeredUsers[index].employeeNumber}',
+                  style: const TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Time In: ${widget.registeredUsers[index].timeIn}',
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   void deletePerson(int index) async {
     try {
       if (index >= 0 && index < widget.registeredUsers.length) {
@@ -73,43 +139,33 @@ class _RegisteredUsersPageState extends State<RegisteredUsersPage> {
       body: ListView.builder(
         itemCount: widget.registeredUsers.length,
         itemBuilder: (BuildContext context, int index) {
-          return Dismissible(
-            key: Key(widget.registeredUsers[index].name),
-            onDismissed: (direction) {
-              deletePerson(index);
+          return GestureDetector(
+            onTap: () {
+              showUserDetails(index);
             },
-            background: Container(
-              color: Colors.red,
-              alignment: Alignment.centerRight,
-              padding: const EdgeInsets.only(right: 20.0),
-              child: const Icon(Icons.delete, color: Colors.red),
-            ),
-            child: SizedBox(
-              height: 75,
-              child: Card(
-                child: Row(
-                  children: [
-                    const SizedBox(width: 16),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(28.0),
-                      child: Image.memory(
-                        widget.registeredUsers[index].faceJpg,
-                        width: 56,
-                        height: 56,
-                      ),
+            child: Card(
+              child: Row(
+                children: [
+                  const SizedBox(width: 16),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(28.0),
+                    child: Image.memory(
+                      widget.registeredUsers[index].faceJpg,
+                      width: 56,
+                      height: 56,
                     ),
-                    const SizedBox(width: 16),
-                    Text(widget.registeredUsers[index].name),
-                    const Spacer(),
-                    IconButton(
-                      icon: const Icon(Icons.delete),
-                      onPressed: () {
-                        deletePerson(index);
-                      },
-                    ),
-                    const SizedBox(width: 8),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: 16),
+                  Text(widget.registeredUsers[index].name),
+                  const Spacer(),
+                  IconButton(
+                    icon: const Icon(Icons.delete),
+                    onPressed: () {
+                      deletePerson(index);
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                ],
               ),
             ),
           );

@@ -190,7 +190,7 @@ class MyHomePageState extends State<MyHomePage> {
             children: [
               TextField(
                 controller: nameController,
-                decoration: const InputDecoration(hintText: 'Name'),
+                decoration: const InputDecoration(hintText: 'Full Name'),
               ),
               TextField(
                 controller: departmentController,
