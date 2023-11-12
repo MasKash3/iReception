@@ -8,7 +8,6 @@ class DatabaseHelper {
   static Database? _database; // Singleton Database
 
   String personTable = 'person';
-  // String colId = 'id';
   String colName = 'name';
   String colDepartment = 'department';
   String colPosition = 'position';
@@ -31,7 +30,7 @@ class DatabaseHelper {
   }
 
   Future<Database> initializeDatabase() async {
-    String path = join(await getDatabasesPath(), 'person.db');
+    String path = join(await getDatabasesPath(), 'employees.db');
     var database = await openDatabase(path, version: 1, onCreate: _createDb);
     return database;
   }
@@ -41,7 +40,6 @@ class DatabaseHelper {
       // Create the table
       await txn.execute('''
       CREATE TABLE $personTable (
-        -- colId INTEGER PRIMARY AUTOINCREMENT,
         $colName TEXT,
         $colDepartment TEXT,
         $colPosition TEXT,
@@ -58,10 +56,15 @@ class DatabaseHelper {
   // CRUD operations
 
   Future<int> insertPerson(Person person) async {
-    Database db = await database;
-    var result = await db.insert(personTable, person.toMap());
-    print('Insertion result: $result');
-    return result;
+    try {
+      Database db = await database;
+      var result = await db.insert(personTable, person.toMap());
+      // print("Result1 is: $result");
+      return result;
+    } catch (e) {
+      print("Exception during insertion is: $e");
+      return -1;
+    }
   }
 
   Future<List<Person>> getPersonsList() async {

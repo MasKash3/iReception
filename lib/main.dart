@@ -3,7 +3,6 @@
 import 'package:facerecognition_flutter/database_helper.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'dart:math';
 import 'package:facesdk_plugin/facesdk_plugin.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_exif_rotation/flutter_exif_rotation.dart';
@@ -68,10 +67,8 @@ class MyHomePageState extends State<MyHomePage> {
     int facepluginState = -1;
     String warningState = "";
     bool visibleWarning = false;
-
-    List<Person> personList =
-        await _databaseHelper.getPersonsList(); // Use DatabaseHelper method
-
+    var db = await _databaseHelper.initializeDatabase();
+    // personList =  await _databaseHelper.getPersonsList(); // Use DatabaseHelper method
     try {
       if (Platform.isAndroid) {
         await _facesdkPlugin
@@ -135,13 +132,11 @@ class MyHomePageState extends State<MyHomePage> {
     setState(() {
       _warningState = warningState;
       _visibleWarning = visibleWarning;
-      widget.personList = personList;
     });
   }
 
   Future<void> insertPerson(Person person) async {
     int result = await _databaseHelper.insertPerson(person);
-    // await _databaseHelper.insertPerson(person);
     (
       'person',
       person.toMap(),
@@ -162,17 +157,18 @@ class MyHomePageState extends State<MyHomePage> {
       setState(() {
         widget.personList.add(person);
       });
-    } else {
-      Fluttertoast.showToast(
-          msg: "Person already exists!",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 16.0);
     }
-    return name;
+    // } else {
+    //   Fluttertoast.showToast(
+    //       msg: "Person already exists!",
+    //       toastLength: Toast.LENGTH_SHORT,
+    //       gravity: ToastGravity.BOTTOM,
+    //       timeInSecForIosWeb: 1,
+    //       backgroundColor: Colors.red,
+    //       textColor: Colors.white,
+    //       fontSize: 16.0);
+    // }
+    // return name;
   }
 
   Future<Map<String, String>?> getDetailsDialog(BuildContext context) async {
@@ -307,9 +303,9 @@ class MyHomePageState extends State<MyHomePage> {
 
           // print(details?['name']);
 
-          if (details?['name'] != null) {
+          if (details != null) {
             Person person = Person(
-              name: capitalize(details!['name']!), // Use the entered name
+              name: capitalize(details['name']!), // Use the entered name
               department: details['department']!,
               position: details['position']!,
               email: details['email']!,
