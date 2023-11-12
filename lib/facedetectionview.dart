@@ -53,6 +53,30 @@ class FaceRecognitionViewState extends State<FaceRecognitionView> {
     });
   }
 
+  void showPersonDetailsPopUp(String name, String department) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Details"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text("Name: $name"),
+              Text("Department: $department"),
+            ],
+          ),
+        );
+      },
+    );
+
+    // Automatically close the dialog after 5 seconds
+    Future.delayed(const Duration(seconds: 5), () {
+      Navigator.of(context).pop();
+    });
+  }
+
   Future<void> faceRecognitionStart() async {
     final prefs = await SharedPreferences.getInstance();
     var cameraLens = prefs.getInt("camera_lens");
@@ -105,6 +129,7 @@ class FaceRecognitionViewState extends State<FaceRecognitionView> {
 
       if (maxSimilarity > _identifyThreshold &&
           maxLiveness > _livenessThreshold) {
+        // showPersonDetailsPopUp(maxSimilarityName, "Department XYZ");
         recognized = true;
       }
     }
