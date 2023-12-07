@@ -6,7 +6,7 @@ abstract class FaceDetectionInterface {
   FaceDetectionInterface();
 
   void onFaceDetected(faces) {
-    throw UnimplementedError('platformVersion() has not been implemented.');
+    throw UnimplementedError('platformVersion() has not been implemented. ');
   }
 }
 
