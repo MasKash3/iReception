@@ -349,10 +349,10 @@ class FacePainter extends CustomPainter {
         Color color = const Color.fromARGB(0xff, 0xff, 0, 0);
         if (face['liveness'] < livenessThreshold) {
           color = const Color.fromARGB(0xff, 0xff, 0, 0);
-          title = "Spoof${face['liveness']}";
+          title = "Match percentage: ${face['liveness']}";
         } else {
           color = const Color.fromARGB(0xff, 0, 0xff, 0);
-          title = "Real ${face['liveness']}";
+          title = "Face matched: ${face['liveness']}";
         }
 
         TextSpan span =
