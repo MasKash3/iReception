@@ -10,6 +10,7 @@ import 'package:flutter_exif_rotation/flutter_exif_rotation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:io' show Platform;
 import 'about.dart';
 import 'settings.dart';
@@ -64,6 +65,9 @@ class MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> init() async {
+    await dotenv.load(fileName: ".env");
+    String activationKey = dotenv.env['FACE_SDK_ACTIVATION_CODE'] ?? "";
+    String activationKey2 = dotenv.env['FACE_SDK_ACTIVATION_CODE_2'] ?? "";
     int facepluginState = -1;
     String warningState = "";
     bool visibleWarning = false;
@@ -72,21 +76,11 @@ class MyHomePageState extends State<MyHomePage> {
     try {
       if (Platform.isAndroid) {
         await _facesdkPlugin
-            .setActivation(
-                "Os8QQO1k4+7MpzJ00bVHLv3UENK8YEB04ohoJsU29wwW1u4fBzrpF6MYoqxpxXw9m5LGd0fKsuiK"
-                "fETuwulmSR/gzdSndn8M/XrEMXnOtUs1W+XmB1SfKlNUkjUApax82KztTASiMsRyJ635xj8C6oE1"
-                "gzCe9fN0CT1ysqCQuD3fA66HPZ/Dhpae2GdKIZtZVOK8mXzuWvhnNOPb1lRLg4K1IL95djy0PKTh"
-                "BNPKNpI6nfDMnzcbpw0612xwHO3YKKvR7B9iqRbalL0jLblDsmnOqV7u1glLvAfSCL7F5G1grwxL"
-                "Yo1VrNPVGDWA/Qj6Z2tPC0ENQaB4u/vXAS0ipg==")
+            .setActivation(activationKey)
             .then((value) => facepluginState = value ?? -1);
       } else {
         await _facesdkPlugin
-            .setActivation(
-                "nWsdDhTp12Ay5yAm4cHGqx2rfEv0U+Wyq/tDPopH2yz6RqyKmRU+eovPeDcAp3T3IJJYm2LbPSEz"
-                "+e+YlQ4hz+1n8BNlh2gHo+UTVll40OEWkZ0VyxkhszsKN+3UIdNXGaQ6QL0lQunTwfamWuDNx7Ss"
-                "efK/3IojqJAF0Bv7spdll3sfhE1IO/m7OyDcrbl5hkT9pFhFA/iCGARcCuCLk4A6r3mLkK57be4r"
-                "T52DKtyutnu0PDTzPeaOVZRJdF0eifYXNvhE41CLGiAWwfjqOQOHfKdunXMDqF17s+LFLWwkeNAD"
-                "PKMT+F/kRCjnTcC8WPX3bgNzyUBGsFw9fcneKA==")
+            .setActivation(activationKey2)
             .then((value) => facepluginState = value ?? -1);
       }
 
