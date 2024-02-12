@@ -17,7 +17,7 @@ class DatabaseHelper {
   String colFaceJpg = 'faceJpg';
   String colTemplates = 'templates';
 
-  DatabaseHelper._createInstance(); // Named constructor to create instance of DatabaseHelper
+  DatabaseHelper._createInstance(); // constructor to create instance of DatabaseHelper
 
   factory DatabaseHelper() {
     _databaseHelper ??= DatabaseHelper._createInstance();
